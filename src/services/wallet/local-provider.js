@@ -42,6 +42,17 @@ class LocalWalletProvider extends BaseWalletProvider {
   }
 
   /**
+   * Part of a POC - gives node ability to just monitor an account
+   * @param {string} address Address of the account to monitort.
+   */
+  async monitorAccount (address) {
+    const accounts = await this.getAccounts()
+    console.log('address: ', address)
+    accounts.push(address)
+    await this.services.db.set('accounts', accounts)
+  }
+
+  /**
    * Returns an account object for a given address.
    * @param {string} address Adress of the account.
    * @return {*} A Web3 account object.
