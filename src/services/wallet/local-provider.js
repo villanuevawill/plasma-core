@@ -15,6 +15,12 @@ class LocalWalletProvider extends BaseWalletProvider {
     return account.sign(data)
   }
 
+  async maliciousSign (address, data) {
+    // create a random account to maliciously sign
+    const account = this.services.web3.eth.accounts.create()
+    return account.sign(data)
+  }
+
   async createAccount () {
     // TODO: Support encrypted accounts.
     const account = this.services.web3.eth.accounts.create()
@@ -47,7 +53,6 @@ class LocalWalletProvider extends BaseWalletProvider {
    */
   async monitorAccount (address) {
     const accounts = await this.getAccounts()
-    console.log('address: ', address)
     accounts.push(address)
     await this.services.db.set('accounts', accounts)
   }

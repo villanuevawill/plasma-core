@@ -17,6 +17,7 @@ class WalletSubdispatcher extends BaseSubdispatcher {
     return {
       getAccounts: wallet.getAccounts.bind(wallet),
       sign: wallet.sign.bind(wallet),
+      maliciousSign: wallet.maliciousSign.bind(wallet),
       createAccount: wallet.createAccount.bind(wallet),
       monitorAccount: wallet.monitorAccount.bind(wallet)
     }
