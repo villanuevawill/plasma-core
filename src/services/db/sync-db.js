@@ -42,10 +42,9 @@ class SyncDB extends BaseService {
    * @param {<string>} an error string
    */
   async setMaliciousTransaction (address, message, hash) {
-    const rawMalicious = await this.services.db.get(`sync:malicious:${address}`, '{}')
-    const currentMalicious = JSON.parse(rawMalicious)
-    currentMalicious[hash] = message
-    return this.services.db.set(`sync:malicious:${address}`, JSON.stringify(currentMalicious))
+    const rawMalicious = await this.services.db.get(`sync:malicious:${address}`, {})
+    rawMalicious[hash] = message
+    return this.services.db.set(`sync:malicious:${address}`, JSON.stringify(rawMalicious))
   }
 
 

@@ -101,16 +101,19 @@ class SyncService extends BaseService {
         firstUnsyncedBlock,
         currentBlock
       )
-      if (received.length || received[0]) {
-        this.pending = this.pending.concat({received: received, address: address})
+
+      if (received.length) {
+        for (let i = 0; i < received.length; i++) {
+          this.pending.push({received: received[i], address: address})
+        }
       }
     }
 
     // Add any previously failed transactions to try again.
-    this.pending = this.pending.concat(prevFailed)
+    // this.pending = this.pending.concat(prevFailed)
 
     // Remove any duplicates
-    this.pending = [...new Set(this.pending)]
+    // this.pending = [...new Set(this.pending)]
 
     let failed = []
     for (let i = 0; i < this.pending.length; i++) {
