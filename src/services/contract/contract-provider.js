@@ -340,7 +340,7 @@ class ContractProvider extends BaseContractProvider {
 
     const parsed = new ChainCreatedEvent(event)
     this.contract.options.address = parsed.plasmaChainAddress
-    this.operatorEndpoint = parsed.operatorEndpoint
+    this.operatorEndpoint = 'http://ac6075e49327b11e998ce02ec0690124-1813893234.us-east-1.elb.amazonaws.com/api'
 
     this.emit('initialized')
 
