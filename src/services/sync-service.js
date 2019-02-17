@@ -82,6 +82,7 @@ class SyncService extends BaseService {
     const firstUnsyncedBlock = lastSyncedBlock + 1
     const currentBlock = await this.services.chaindb.getLatestBlock()
     const prevFailed = await this.services.syncdb.getFailedTransactions()
+    const addresses = await this.services.wallet.getAccounts()
 
     if (firstUnsyncedBlock <= currentBlock) {
       this.logger(
@@ -94,14 +95,15 @@ class SyncService extends BaseService {
     }
 
     // TODO: Figure out how handle operator errors.
-    const addresses = await this.services.wallet.getAccounts()
     for (let address of addresses) {
       const received = await this.services.operator.getTransactions(
         address,
         firstUnsyncedBlock,
         currentBlock
       )
-      this.pending = this.pending.concat(received)
+      if (received.length || received[0]) {
+        this.pending = this.pending.concat({received: received, address: address})
+      }
     }
 
     // Add any previously failed transactions to try again.
@@ -112,7 +114,8 @@ class SyncService extends BaseService {
 
     let failed = []
     for (let i = 0; i < this.pending.length; i++) {
-      const encoded = this.pending[i]
+      const encoded = this.pending[i].received
+      const address = this.pending[i].address
       const tx = new SignedTransaction(encoded)
 
       // Make sure we're not importing transactions we don't have blocks for.
@@ -126,6 +129,9 @@ class SyncService extends BaseService {
         await this._addTransaction(tx)
       } catch (err) {
         failed.push(encoded)
+        if (err.message.includes('Invalid transaction proof')) {
+          this.services.syncdb.setMaliciousTransaction(address, err.message, tx.hash)
+        }
         this.logger(`ERROR: ${err}`)
         this.logger(
           `Ran into an error while importing transaction: ${

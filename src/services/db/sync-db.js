@@ -36,6 +36,27 @@ class SyncDB extends BaseService {
     return this.services.db.get('sync:failed', [])
   }
 
+
+  /**
+   * Sets malicious transactions.
+   * @param {<string>} an error string
+   */
+  async setMaliciousTransaction (address, message, hash) {
+    const rawMalicious = await this.services.db.get(`sync:malicious:${address}`, '{}')
+    const currentMalicious = JSON.parse(rawMalicious)
+    currentMalicious[hash] = message
+    return this.services.db.set(`sync:malicious:${address}`, JSON.stringify(currentMalicious))
+  }
+
+
+  /**
+   * Returns malicious transaction for address.
+   * @return {<string>} malicious transaction
+   */
+  async getMaliciousTransactions (address) {
+    return this.services.db.get(`sync:malicious:${address}`, '{}')
+  }
+
   /**
    * Sets the failed transactions.
    * @param {Array<string>} transactions An array of encoded transactions.

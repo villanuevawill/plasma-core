@@ -219,7 +219,7 @@ class ChainService extends BaseService {
       await this.services.proof.checkProof(tx, deposits, proof)
     } catch (e) {
       this.logger(`ERROR: Rejecting transaction proof for: ${tx.hash}`)
-      throw new Error('Invalid transaction proof')
+      throw new Error(`Invalid transaction proof: ${e.message}`)
     }
 
     this.logger(`Verified transaction proof for: ${tx.hash}`)
@@ -270,6 +270,15 @@ class ChainService extends BaseService {
     this.logger(`Added transaction to database: ${tx.hash}.`)
 
     return receipt
+  }
+
+  /**
+   * Gets malicious transaction records from an address
+   * @param {address} wallet address
+   */
+  async getMaliciousTransactions (address) {
+    const transactions = await this.services.syncdb.getMaliciousTransactions(address)
+    return transactions
   }
 
   /**
