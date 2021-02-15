@@ -1,6 +1,6 @@
 {
   "name": "plasma-core",
-  "version": "0.0.4-beta.40",
+  "version": "0.0.1",
   "description": "Core PG plasma node",
   "main": "index.js",
   "scripts": {
@@ -9,11 +9,6 @@
     "test.integration": "./node_modules/.bin/mocha --recursive test/integration --timeout 10000",
     "test.coverage": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "lint": "./node_modules/.bin/eslint src/ test/"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm test && lint-staged"
-    }
   },
   "lint-staged": {
     "src/**/*.{js,json,css,md}": [

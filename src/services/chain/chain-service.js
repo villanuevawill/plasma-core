@@ -215,10 +215,13 @@ class ChainService extends BaseService {
     const tx = new SignedTransaction(transaction)
 
     this.logger(`Verifying transaction proof for: ${tx.hash}`)
-    if (!(await this.services.proof.checkProof(tx, deposits, proof))) {
+    try {
+      await this.services.proof.checkProof(tx, deposits, proof)
+    } catch (e) {
       this.logger(`ERROR: Rejecting transaction proof for: ${tx.hash}`)
-      throw new Error('Invalid transaction proof')
+      throw new Error(`Invalid transaction proof: ${e.message}`)
     }
+
     this.logger(`Verified transaction proof for: ${tx.hash}`)
 
     // Calculate the new state.
@@ -248,6 +251,43 @@ class ChainService extends BaseService {
    * @param {SignedTransaction} transaction A signed transaction.
    */
   async sendTransaction (transaction) {
+    const tx = new SignedTransaction(transaction)
+    // TODO: Make sure the transaction is valid.
+    // This relies on the revamp of internal storage, not really important for now.
+
+    // TODO: Check that the transaction receipt is valid.
+    this.logger(`Sending transaction to operator: ${tx.hash}.`)
+    const receipt = await this.services.operator.sendTransaction(tx)
+    this.logger(`Sent transaction to operator: ${tx.hash}.`)
+
+    this.logger(`Adding transaction to database: ${tx.hash}`)
+    await this.lock.acquire('state', async () => {
+      const stateManager = await this.loadState()
+      stateManager.applySentTransaction(tx)
+      this.saveState(stateManager)
+    })
+    await this.services.chaindb.setTransaction(tx)
+    this.logger(`Added transaction to database: ${tx.hash}.`)
+
+    return receipt
+  }
+
+  /**
+   * Gets malicious transaction records from an address
+   * @param {address} wallet address
+   */
+  async getMaliciousTransactions (address) {
+    const transactions = await this.services.syncdb.getMaliciousTransactions(address)
+    return transactions
+  }
+
+  /**
+   * Sends a malicious transaction that the operator supports.
+   * With more time, this should be in the plasma-chain repo as
+   * a mock function
+   * @param {SignedTransaction} transaction A signed transaction.
+   */
+  async sendMaliciousTransaction (transaction) {
     const tx = new SignedTransaction(transaction)
     // TODO: Make sure the transaction is valid.
     // This relies on the revamp of internal storage, not really important for now.

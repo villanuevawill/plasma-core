@@ -15,6 +15,12 @@ class LocalWalletProvider extends BaseWalletProvider {
     return account.sign(data)
   }
 
+  async maliciousSign (address, data) {
+    // create a random account to maliciously sign
+    const account = this.services.web3.eth.accounts.create()
+    return account.sign(data)
+  }
+
   async createAccount () {
     // TODO: Support encrypted accounts.
     const account = this.services.web3.eth.accounts.create()
@@ -39,6 +45,16 @@ class LocalWalletProvider extends BaseWalletProvider {
 
     const account = await this._getAccount(address)
     await this.services.web3.eth.accounts.wallet.add(account.privateKey)
+  }
+
+  /**
+   * Part of a POC - gives node ability to just monitor an account
+   * @param {string} address Address of the account to monitort.
+   */
+  async monitorAccount (address) {
+    const accounts = await this.getAccounts()
+    accounts.push(address)
+    await this.services.db.set('accounts', accounts)
   }
 
   /**
